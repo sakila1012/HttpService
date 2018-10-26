@@ -1,77 +1,16 @@
 # HttpService
 封装 axios
 
-import axios from 'axios'
-import router from '../router/router'
+在网上搜了好多关于 axios 的封装，发现他们均无法使用，通用型不太好。
 
-axios.defaults.timeout = 5000
-// 配置默认 url
-axios.defaults.baseURL = 'https://www.easy-mock.com/mock/5bd05256e11dd958b534cf2a'
-axios.defaults.withCredentials = true
+## 第一步 安装 axios
 
-// http request 拦截器
-axios.interceptors.request.use(
-  config => {
-    config.data = JSON.stringify(config.data)
-    config.headers = {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-    }
-    return config
-  },
-  error => {
-    return Promise.reject(error)
-  }
-)
+## 第二步 创建 HttpService.js
 
-// http response 拦截器
-axios.interceptors.response.use(
-  response => {
-    if (response.data.code === '404') {
-      router.push({
-        path: '/login',
-        querry: { redirect: router.currentRoute.fullPath } // 从哪个页面跳转
-      })
-    }
-    return Promise.resolve(response)
-  },
-  error => {
-    return Promise.reject(error)
-  }
-)
+在 src > api 目录下 创建 HttpService.js，具体内容见下
 
-/***
- * 封装 HTTP 请求
- * @param url
- * @param data
- * @return {Promise}
- */
+## 第三步 在main.js，引入 HttpService.js
 
-function apiAxios (method, url, params) {
-  return new Promise((resolve, reject) => {
-    axios({
-      method: method,
-      url: url,
-      data: method === 'POST' || method === 'PUT' ? params : null,
-      params: method === 'GET' || method === 'DELETE' ? params : null
-    }).then(function (res) {
-      resolve(res)
-    }).then(function (err) {
-      reject(err)
-    })
-  })
-}
+## 第四步， 在任意组件中使用
 
-export default {
-  get: function (url, params) {
-    return apiAxios('GET', url, params)
-  },
-  post: function (url, params) {
-    return apiAxios('POST', url, params)
-  },
-  put: function (url, params) {
-    return apiAxios('PUT', url, params)
-  },
-  delete: function (url, params) {
-    return apiAxios('DELETE', url, params)
-  }
-}
+错误之处，欢迎指正。
