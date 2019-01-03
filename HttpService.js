@@ -1,5 +1,7 @@
 import axios from 'axios'
 import router from '../router/router'
+import iView from 'iview'
+import QS from 'qs'
 
 axios.defaults.timeout = 5000
 // 配置默认 url
@@ -10,9 +12,10 @@ axios.defaults.withCredentials = true
 axios.interceptors.request.use(
   config => {
     config.data = JSON.stringify(config.data)
-    config.headers = {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+    config.paramsSerializer = (params) => {
+      return QS.stringify(params, { indices: false })
     }
+    iView.LoadingBar.start()
     return config
   },
   error => {
@@ -23,6 +26,7 @@ axios.interceptors.request.use(
 // http response 拦截器
 axios.interceptors.response.use(
   response => {
+    iView.LoadingBar.finish()
     if (response.data.code === '404') {
       router.push({
         path: '/login',
@@ -32,6 +36,7 @@ axios.interceptors.response.use(
     return Promise.resolve(response)
   },
   error => {
+    iView.LoadingBar.error()
     return Promise.reject(error)
   }
 )
@@ -49,7 +54,8 @@ function apiAxios (method, url, params) {
       method: method,
       url: url,
       data: method === 'POST' || method === 'PUT' ? params : null,
-      params: method === 'GET' || method === 'DELETE' ? params : null
+      params: method === 'GET' || method === 'DELETE' ? params : null,
+      headers: method === 'POST' || method === 'PUT' ? { 'Content-Type': 'application/json;charset=UTF-8' } : { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
     }).then(function (res) {
       resolve(res)
     }).then(function (err) {
